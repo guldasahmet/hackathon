@@ -48,7 +48,10 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            flash('Bu sayfaya erişmek için giriş yapmalısınız.', 'warning')
+            # Aynı mesajı tekrar eklememek için kontrol
+            if '_login_warned' not in session:
+                flash('Bu sayfaya erişmek için giriş yapmalısınız.', 'warning')
+                session['_login_warned'] = True
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -59,7 +62,9 @@ def role_required(*roles):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if 'user' not in session:
-                flash('Bu sayfaya erişmek için giriş yapmalısınız.', 'warning')
+                if '_login_warned' not in session:
+                    flash('Bu sayfaya erişmek için giriş yapmalısınız.', 'warning')
+                    session['_login_warned'] = True
                 return redirect(url_for('login'))
             
             user_role = session['user'].get('role')
@@ -93,6 +98,9 @@ def login():
                 'full_name': user['full_name'],
                 'vehicle_id': user['vehicle_id']
             }
+            
+            # Login warning flag'ini temizle
+            session.pop('_login_warned', None)
             
             flash(f"Hoş geldiniz, {user['full_name']}!", 'success')
             

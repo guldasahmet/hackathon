@@ -345,6 +345,17 @@
                 month: 'long', 
                 year: 'numeric' 
             });
+        
+        // Alert'leri 5 saniye sonra otomatik kapat
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
     </script>
     
     {% block extra_js %}{% endblock %}
