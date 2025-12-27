@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Şoför Performansı - NilüferAKS{% endblock %}
+
+{% block extra_head %}
+<style>
+    .score-card {
+        border-left: 4px solid;
+        transition: transform 0.2s;
+    }
+    .score-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .tier-badge {
+        font-size: 3rem;
+        text-align: center;
+        padding: 1rem;
+    }
+    .tier-gold { border-left-color: #FFD700; background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%); }
+    .tier-silver { border-left-color: #C0C0C0; background: linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 100%); }
+    .tier-bronze { border-left-color: #CD7F32; background: linear-gradient(135deg, #FFF4E6 0%, #FFFFFF 100%); }
+    .tier-rookie { border-left-color: #808080; background: linear-gradient(135deg, #F0F0F0 0%, #FFFFFF 100%); }
+    
+    .achievement-item {
+        display: inline-block;
+        margin: 5px;
+        padding: 10px 15px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 2px solid #dee2e6;
+    }
+    .achievement-item .icon {
+        font-size: 2rem;
+        margin-right: 10px;
+    }
+    
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+    .progress-ring-circle {
+        transition: stroke-dashoffset 0.5s;
+        fill: transparent;
+        stroke-width: 8;
+    }
+    
+    .leaderboard-rank {
+        font-size: 2rem;
+        font-weight: bold;
+        width: 60px;
+        text-align: center;
+    }
+    .rank-1 { color: #FFD700; }
+    .rank-2 { color: #C0C0C0; }
+    .rank-3 { color: #CD7F32; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-trophy me-2"></i>Şoför Performans Sistemi</h2>
+        <p class="text-muted">Puanınızı artırın, priminizi kazanın! 🎯</p>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary" onclick="loadPerformanceData()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Yenile
+        </button>
+    </div>
+</div>
+
+<!-- Genel Durum -->
+<div class="row mb-4">
+    <!-- Mevcut Seviye -->
+    <div class="col-lg-4 mb-3">
+        <div class="card score-card h-100" id="tier-card">
+            <div class="card-body text-center">
+                <div class="tier-badge mb-3" id="tier-icon">🚛</div>
+                <h4 id="tier-name">Çaylak</h4>
+                <p class="text-muted mb-3">Mevcut Seviyeniz</p>
+                <h2 class="text-primary mb-1" id="avg-score">0.0</h2>
+                <small class="text-muted">Ortalama Puan (7 gün)</small>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Prim Oranı:</span>
+                    <h5 class="mb-0 text-success" id="bonus-percentage">%0</h5>
+                </div>
+                <small class="text-muted">Aylık ~<span id="bonus-amount">0</span> TL</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bugünkü Performans -->
+    <div class="col-lg-4 mb-3">
+        <div class="card score-card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-calendar-check me-2"></i>Bugün</h5>
+                <div class="text-center mb-3">
+                    <canvas id="today-score-chart" width="150" height="150"></canvas>
+                    <h3 class="mt-2" id="today-score">-</h3>
+                </div>
+                <div class="row text-center">
+                    <div class="col-6 mb-2">
+                        <small class="text-muted">Rota Uyumu</small>
+                        <h6 id="today-route">-</h6>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <small class="text-muted">Zaman</small>
+                        <h6 id="today-time">-</h6>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Yakıt</small>
+                        <h6 id="today-fuel">-</h6>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Tonaj</small>
+                        <h6 id="today-tonnage">-</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sıralama ve İstatistik -->
+    <div class="col-lg-4 mb-3">
+        <div class="card score-card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-bar-chart me-2"></i>Genel Durum</h5>
+                <div class="text-center mb-3">
+                    <div class="leaderboard-rank" id="current-rank">-</div>
+                    <small class="text-muted">Sıralamanız</small>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-calendar3 me-1"></i>Çalışılan Gün</span>
+                    <strong id="days-worked">-</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-fuel-pump me-1"></i>Yakıt Tasarrufu</span>
+                    <strong class="text-success" id="fuel-saved">- L</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span><i class="bi bi-star me-1"></i>Rozet Sayısı</span>
+                    <strong class="text-warning" id="achievement-count">-</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Puan Detayları -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card score-card" style="border-left-color: #0d6efd;">
+            <div class="card-body text-center">
+                <i class="bi bi-map text-primary" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Rota Uyumu</h6>
+                <h4 class="text-primary mb-0" id="score-route">0/30</h4>
+                <small class="text-muted">%30 Ağırlık</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card score-card" style="border-left-color: #198754;">
+            <div class="card-body text-center">
+                <i class="bi bi-clock text-success" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Zamanında Tamamlama</h6>
+                <h4 class="text-success mb-0" id="score-time">0/25</h4>
+                <small class="text-muted">%25 Ağırlık</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card score-card" style="border-left-color: #ffc107;">
+            <div class="card-body text-center">
+                <i class="bi bi-fuel-pump text-warning" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Yakıt Verimliliği</h6>
+                <h4 class="text-warning mb-0" id="score-fuel">0/25</h4>
+                <small class="text-muted">%25 Ağırlık</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card score-card" style="border-left-color: #dc3545;">
+            <div class="card-body text-center">
+                <i class="bi bi-trash text-danger" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">Toplanan Tonaj</h6>
+                <h4 class="text-danger mb-0" id="score-tonnage">0/20</h4>
+                <small class="text-muted">%20 Ağırlık</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Başarılar ve Liderlik -->
+<div class="row mb-4">
+    <!-- Rozetler -->
+    <div class="col-lg-6 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-award me-2"></i>Rozetlerim
+            </div>
+            <div class="card-body" id="achievements-container">
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-trophy" style="font-size: 3rem;"></i>
+                    <p class="mt-2">Henüz rozet kazanmadınız</p>
+                    <small>85+ puan alarak rozet kazanmaya başlayın!</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Liderlik Tablosu -->
+    <div class="col-lg-6 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-list-ol me-2"></i>Liderlik Tablosu (Haftalık)
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush" id="leaderboard-container">
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-hourglass-split" style="font-size: 3rem;"></i>
+                        <p class="mt-2">Liderlik tablosu yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performans Grafiği -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up me-2"></i>Haftalık Performans Grafiği
+            </div>
+            <div class="card-body">
+                <canvas id="performance-chart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Jinja2 template değişkenini JavaScript'e aktar
+const driverId = parseInt('{{ session["user"]["id"] }}');
+
+// Performans verilerini yükle
+async function loadPerformanceData() {
+    try {
+        // Dashboard verisi
+        const dashResponse = await fetch(`/api/gamification/dashboard/${driverId}`);
+        const dashData = await dashResponse.json();
+        
+        // Performans detayı
+        const perfResponse = await fetch(`/api/gamification/performance/${driverId}?period=week`);
+        const perfData = await perfResponse.json();
+        
+        // Rozetler
+        const achResponse = await fetch(`/api/gamification/achievements/${driverId}`);
+        const achData = await achResponse.json();
+        
+        // Liderlik tablosu
+        const leaderResponse = await fetch('/api/gamification/leaderboard?period=week');
+        const leaderData = await leaderResponse.json();
+        
+        updateDashboard(dashData, perfData, achData, leaderData);
+    } catch (error) {
+        console.error('Performans verisi yüklenemedi:', error);
+    }
+}
+
+function updateDashboard(dashData, perfData, achData, leaderData) {
+    // Seviye kartı
+    const summary = perfData.summary;
+    const tierCard = document.getElementById('tier-card');
+    tierCard.className = `card score-card h-100 tier-${summary.current_tier}`;
+    document.getElementById('tier-icon').textContent = summary.tier_name.split(' ')[0];
+    document.getElementById('tier-name').textContent = summary.tier_name;
+    document.getElementById('avg-score').textContent = (summary.avg_score || 0).toFixed(1);
+    document.getElementById('bonus-percentage').textContent = `%${summary.bonus_percentage}`;
+    document.getElementById('bonus-amount').textContent = Math.round((20000 * summary.bonus_percentage) / 100).toLocaleString();
+    
+    // Bugünkü performans
+    const today = dashData.today;
+    if (today) {
+        document.getElementById('today-score').textContent = today.total_score.toFixed(1);
+        document.getElementById('today-route').textContent = `${today.route_score.toFixed(1)}/30`;
+        document.getElementById('today-time').textContent = `${today.time_score.toFixed(1)}/25`;
+        document.getElementById('today-fuel').textContent = `${today.fuel_score.toFixed(1)}/25`;
+        document.getElementById('today-tonnage').textContent = `${today.tonnage_score.toFixed(1)}/20`;
+        
+        // Puan kartları
+        document.getElementById('score-route').textContent = `${today.route_score.toFixed(1)}/30`;
+        document.getElementById('score-time').textContent = `${today.time_score.toFixed(1)}/25`;
+        document.getElementById('score-fuel').textContent = `${today.fuel_score.toFixed(1)}/25`;
+        document.getElementById('score-tonnage').textContent = `${today.tonnage_score.toFixed(1)}/20`;
+    }
+    
+    // Genel durum
+    const weekSummary = dashData.week_summary;
+    document.getElementById('current-rank').textContent = `#${weekSummary.rank || '-'}`;
+    document.getElementById('current-rank').className = `leaderboard-rank rank-${weekSummary.rank || ''}`;
+    document.getElementById('days-worked').textContent = summary.days_worked || 0;
+    document.getElementById('fuel-saved').textContent = `${(summary.total_fuel_saved || 0).toFixed(1)} L`;
+    document.getElementById('achievement-count').textContent = Object.values(achData.stats || {}).reduce((a, b) => a + b, 0);
+    
+    // Rozetler
+    updateAchievements(achData.achievements);
+    
+    // Liderlik tablosu
+    updateLeaderboard(leaderData.leaderboard);
+    
+    // Grafik
+    updateChart(perfData.daily_performance);
+}
+
+function updateAchievements(achievements) {
+    const container = document.getElementById('achievements-container');
+    
+    if (!achievements || achievements.length === 0) {
+        return;
+    }
+    
+    container.innerHTML = achievements.map(ach => `
+        <div class="achievement-item">
+            <span class="icon">${ach.icon}</span>
+            <strong>${ach.achievement_name}</strong>
+            <br>
+            <small class="text-muted">${ach.description}</small>
+            <br>
+            <small class="text-muted">${new Date(ach.earned_at).toLocaleDateString('tr-TR')}</small>
+        </div>
+    `).join('');
+}
+
+function updateLeaderboard(leaderboard) {
+    const container = document.getElementById('leaderboard-container');
+    
+    container.innerHTML = leaderboard.slice(0, 10).map(driver => {
+        const isCurrentDriver = driver.id === driverId;
+        const bgClass = isCurrentDriver ? 'bg-light' : '';
+        const rankClass = driver.rank <= 3 ? `rank-${driver.rank}` : '';
+        
+        // İlk 3 sıra için özel stiller
+        let itemStyle = '';
+        let textClass = '';
+        if (driver.rank === 1) {
+            itemStyle = 'background-color: rgba(255, 193, 7, 0.4);';
+            textClass = 'text-dark';
+        } else if (driver.rank === 2) {
+            itemStyle = 'background-color: rgba(108, 117, 125, 0.15);';
+        } else if (driver.rank === 3) {
+            itemStyle = 'background-color: rgba(13, 202, 240, 0.15);';
+        }
+        
+        // Eğer kendi satırınsa arka planı override etme
+        const finalStyle = isCurrentDriver && !itemStyle ? '' : itemStyle;
+        const finalBgClass = isCurrentDriver && !finalStyle ? bgClass : '';
+        
+        return `
+            <div class="list-group-item ${finalBgClass} ${textClass}" style="${finalStyle}">
+                <div class="d-flex align-items-center">
+                    <span class="leaderboard-rank ${rankClass}" style="font-size: 1.5rem; width: 40px;">#${driver.rank}</span>
+                    <div class="flex-grow-1 ms-3">
+                        <strong>${driver.full_name}</strong> ${isCurrentDriver ? '(Sen)' : ''}
+                        <br>
+                        <small class="text-muted">Araç ${driver.vehicle_id}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-${driver.tier === 'gold' ? 'warning' : driver.tier === 'silver' ? 'secondary' : driver.tier === 'bronze' ? 'info' : 'light'} text-dark">
+                            ${driver.avg_score.toFixed(1)}
+                        </span>
+                        <br>
+                        <small class="text-success">%${driver.bonus_percentage} prim</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+let performanceChart = null;
+
+function updateChart(dailyPerformance) {
+    const ctx = document.getElementById('performance-chart');
+    
+    if (performanceChart) {
+        performanceChart.destroy();
+    }
+    
+    const dates = dailyPerformance.map(d => new Date(d.date).toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' })).reverse();
+    const scores = dailyPerformance.map(d => d.total_score).reverse();
+    
+    performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Toplam Puan',
+                data: scores,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => `Puan: ${context.parsed.y.toFixed(1)}/100`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: (value) => value + ' puan'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Sayfa yüklendiğinde çalıştır
+document.addEventListener('DOMContentLoaded', loadPerformanceData);
+</script>
+{% endblock %}

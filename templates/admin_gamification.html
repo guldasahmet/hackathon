@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Performans Yönetimi - NilüferAKS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-trophy me-2"></i>Şoför Performans Sistemi</h2>
+        <p class="text-muted">Tüm şoförlerin performans ve prim durumu</p>
+    </div>
+    <div class="col-auto">
+        <select class="form-select" id="period-select">
+            <option value="week">Son 7 Gün</option>
+            <option value="month">Son 30 Gün</option>
+        </select>
+    </div>
+</div>
+
+<!-- Genel İstatistikler -->
+<div class="row mb-4">
+    <div class="col-lg-3 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                <h4 class="mt-2" id="total-drivers">-</h4>
+                <small class="text-muted">Aktif Şoför</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-graph-up text-success" style="font-size: 2rem;"></i>
+                <h4 class="mt-2" id="avg-score">-</h4>
+                <small class="text-muted">Ortalama Puan</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-fuel-pump text-warning" style="font-size: 2rem;"></i>
+                <h4 class="mt-2" id="total-fuel-saved">-</h4>
+                <small class="text-muted">Tasarruf (Litre)</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-currency-dollar text-info" style="font-size: 2rem;"></i>
+                <h4 class="mt-2" id="total-bonus">-</h4>
+                <small class="text-muted">Toplam Prim (TL)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liderlik Tablosu -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list-ol me-2"></i>Şoför Performans Tablosu
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Sıra</th>
+                        <th>Şoför</th>
+                        <th>Araç</th>
+                        <th>Çalışılan Gün</th>
+                        <th>Ort. Puan</th>
+                        <th>Seviye</th>
+                        <th>Yakıt Tasarrufu</th>
+                        <th>Prim Oranı</th>
+                        <th>Prim (TL)</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="drivers-table">
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentPeriod = 'week';
+
+async function loadData() {
+    try {
+        const response = await fetch(`/api/gamification/leaderboard?period=${currentPeriod}`);
+        const data = await response.json();
+        
+        updateStats(data.leaderboard);
+        updateTable(data.leaderboard);
+    } catch (error) {
+        console.error('Veri yüklenemedi:', error);
+    }
+}
+
+function updateStats(leaderboard) {
+    document.getElementById('total-drivers').textContent = leaderboard.length;
+    
+    const avgScore = leaderboard.reduce((sum, d) => sum + (d.avg_score || 0), 0) / leaderboard.length;
+    document.getElementById('avg-score').textContent = avgScore.toFixed(1);
+    
+    const totalFuelSaved = leaderboard.reduce((sum, d) => sum + (d.total_fuel_saved || 0), 0);
+    document.getElementById('total-fuel-saved').textContent = totalFuelSaved.toFixed(1) + ' L';
+    
+    const totalBonus = leaderboard.reduce((sum, d) => {
+        const bonus = (20000 * d.bonus_percentage) / 100;
+        return sum + bonus;
+    }, 0);
+    document.getElementById('total-bonus').textContent = Math.round(totalBonus).toLocaleString();
+}
+
+function updateTable(leaderboard) {
+    const tbody = document.getElementById('drivers-table');
+    
+    if (leaderboard.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">Henüz veri yok</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = leaderboard.map(driver => {
+        const tierBadge = getTierBadge(driver.tier);
+        const rankBadge = driver.rank <= 3 ? getRankBadge(driver.rank) : driver.rank;
+        const bonus = Math.round((20000 * driver.bonus_percentage) / 100);
+        const rowStyle = driver.rank <= 3 ? getRowStyle(driver.rank) : '';
+        const textClass = driver.rank === 1 ? 'text-dark' : '';
+        
+        return `
+            <tr style="${rowStyle}" class="${textClass}">
+                <td><strong class="fs-5">${rankBadge}</strong></td>
+                <td><strong>${driver.full_name}</strong></td>
+                <td><span class="badge bg-secondary">${driver.vehicle_id || '-'}</span></td>
+                <td>${driver.days_worked || 0}</td>
+                <td><strong class="text-${getTierColor(driver.tier)}">${(driver.avg_score || 0).toFixed(1)}</strong></td>
+                <td>${tierBadge}</td>
+                <td class="text-success">${(driver.total_fuel_saved || 0).toFixed(1)} L</td>
+                <td><span class="badge bg-info">%${driver.bonus_percentage}</span></td>
+                <td><strong>${bonus.toLocaleString()} TL</strong></td>
+                <td>
+                    <a href="/admin/driver-details/${driver.id}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getRowStyle(rank) {
+    // İlk 3 sıraya arka plan rengi (1. sıra daha açık/parlak)
+    const styles = {
+        1: 'background-color: rgba(255, 193, 7, 0.4);',
+        2: 'background-color: rgba(108, 117, 125, 0.15);', 
+        3: 'background-color: rgba(13, 202, 240, 0.15);'
+    };
+    return styles[rank] || '';
+}
+
+function getTierBadge(tier) {
+    const badges = {
+        'gold': '<span class="badge bg-warning text-dark">🥇 Altın</span>',
+        'silver': '<span class="badge bg-secondary">🥈 Gümüş</span>',
+        'bronze': '<span class="badge bg-info">🥉 Bronz</span>',
+        'rookie': '<span class="badge bg-dark">🚛 Çaylak</span>'
+    };
+    return badges[tier] || badges['rookie'];
+}
+
+function getTierColor(tier) {
+    const colors = {
+        'gold': 'warning',
+        'silver': 'secondary',
+        'bronze': 'info',
+        'rookie': 'muted'
+    };
+    return colors[tier] || 'muted';
+}
+
+function getRankBadge(rank) {
+    const medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
+    return medals[rank] || rank;
+}
+
+// Periode değiştiğinde
+document.getElementById('period-select').addEventListener('change', (e) => {
+    currentPeriod = e.target.value;
+    loadData();
+});
+
+// Sayfa yüklendiğinde
+document.addEventListener('DOMContentLoaded', loadData);
+</script>
+{% endblock %}

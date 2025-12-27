@@ -126,9 +126,69 @@ def init_database():
         )
     ''')
     
+    # 8. ŞOFÖR PERFORMANSI TABLOSU (Gamification)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS driver_performance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            driver_id INTEGER NOT NULL,
+            date DATE NOT NULL,
+            route_score REAL DEFAULT 0,          -- Rota uyumu puanı (0-30)
+            time_score REAL DEFAULT 0,           -- Zaman puanı (0-25)
+            fuel_score REAL DEFAULT 0,           -- Yakıt puanı (0-25)
+            tonnage_score REAL DEFAULT 0,        -- Tonaj puanı (0-20)
+            total_score REAL DEFAULT 0,          -- Toplam (0-100)
+            route_deviation_km REAL DEFAULT 0,   -- Rotadan sapma (km)
+            fuel_saved_lt REAL DEFAULT 0,        -- Tasarruf edilen yakıt (lt)
+            planned_distance_km REAL,
+            actual_distance_km REAL,
+            planned_duration_hours REAL,
+            actual_duration_hours REAL,
+            expected_fuel_lt REAL,
+            actual_fuel_lt REAL,
+            target_tonnage REAL,
+            collected_tonnage REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (driver_id) REFERENCES users(id),
+            UNIQUE(driver_id, date)
+        )
+    ''')
+    
+    # 9. ŞOFÖR BAŞARILARI/ROZETLER TABLOSU
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS driver_achievements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            driver_id INTEGER NOT NULL,
+            achievement_type TEXT NOT NULL,      -- 'gold', 'silver', 'bronze', 'streak', 'weekly_star', 'eco_hero', 'route_master'
+            achievement_name TEXT,
+            description TEXT,
+            icon TEXT,
+            earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (driver_id) REFERENCES users(id)
+        )
+    ''')
+    
+    # 10. HAFTALIK PUAN ÖZET TABLOSU
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS driver_weekly_stats (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            driver_id INTEGER NOT NULL,
+            week_start_date DATE NOT NULL,
+            week_end_date DATE NOT NULL,
+            total_score REAL DEFAULT 0,
+            avg_score REAL DEFAULT 0,
+            days_worked INTEGER DEFAULT 0,
+            rank INTEGER,
+            bonus_amount REAL DEFAULT 0,
+            bonus_percentage REAL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (driver_id) REFERENCES users(id),
+            UNIQUE(driver_id, week_start_date)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
-    print("✅ Veritabanı tabloları oluşturuldu")
+    print("✅ Veritabanı tabloları oluşturuldu (Gamification dahil)")
 
 def create_default_users():
     """Varsayılan kullanıcıları oluştur"""

@@ -16,7 +16,7 @@ from ai.rota_optimizer import optimize_rotalar
 from backend.database.database import verify_user, get_driver_vehicle, DB_PATH, register_user, create_driver, get_all_drivers, delete_driver
 
 # Backend API blueprints
-from backend.api import vehicles_bp, neighborhoods_bp, dashboard_bp, routes_bp
+from backend.api import vehicles_bp, neighborhoods_bp, dashboard_bp, routes_bp, gamification_bp
 
 app = Flask(__name__)
 app.secret_key = 'nilufer-aks-secret-key-2025'  # Production'da değiştir!
@@ -27,6 +27,7 @@ app.register_blueprint(vehicles_bp)
 app.register_blueprint(neighborhoods_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(routes_bp)
+app.register_blueprint(gamification_bp)
 
 # Assets klasörü için route (video, resim vs.)
 @app.route('/assets/<path:filename>')
@@ -289,6 +290,21 @@ def driver():
         vehicle = get_driver_vehicle(user['vehicle_id'])
     
     return render_template('driver.html', user=user, vehicle=vehicle)
+
+@app.route('/driver/performance')
+@login_required
+@role_required('surucu')
+def driver_performance():
+    """Şoför performans/gamification sayfası"""
+    user = session['user']
+    return render_template('driver_performance.html', user=user)
+
+@app.route('/admin/gamification')
+@login_required
+@role_required('yonetici')
+def admin_gamification():
+    """Admin gamification yönetim sayfası"""
+    return render_template('admin_gamification.html')
 
 @app.route('/tracking')
 def tracking():
