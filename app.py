@@ -70,7 +70,13 @@ def role_required(*roles):
             user_role = session['user'].get('role')
             if user_role not in roles:
                 flash('Bu sayfaya erişim yetkiniz yok.', 'danger')
-                return redirect(url_for('index'))
+                # Kullanıcıyı rolüne uygun sayfaya yönlendir (döngü önleme)
+                if user_role == 'surucu':
+                    return redirect(url_for('driver'))
+                elif user_role == 'public':
+                    return redirect(url_for('tracking'))
+                else:
+                    return redirect(url_for('login'))
             
             return f(*args, **kwargs)
         return decorated_function
@@ -251,11 +257,18 @@ def admin_drivers():
 # =============================================================================
 
 @app.route('/')
-@login_required
-@role_required('yonetici')
 def index():
-    """Yönetici paneli"""
-    return render_template('dashboard.html', user=session['user'])
+    """Ana sayfa - Kullanıcıyı rolüne göre yönlendir"""
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    user_role = session['user'].get('role')
+    if user_role == 'yonetici':
+        return render_template('dashboard.html', user=session['user'])
+    elif user_role == 'surucu':
+        return redirect(url_for('driver'))
+    else:
+        return redirect(url_for('tracking'))
 
 @app.route('/yonetici')
 @login_required
