@@ -11,8 +11,7 @@ import pandas as pd
 import json
 import os
 from datetime import datetime
-from ai.talep_tahmin import talep_tahmin_tum_mahalleler
-from ai.rota_optimizer import optimize_rotalar
+# AI modülleri artık güncel_v6_fullvehicle.py kullanıyor
 from backend.database.database import verify_user, get_driver_vehicle, DB_PATH, register_user, create_driver, get_all_drivers, delete_driver
 
 # Backend API blueprints
@@ -359,39 +358,34 @@ def api_tracking():
 
 @app.route('/api/tahmin')
 def api_tahmin():
-    """Mahalle bazlı talep tahmini"""
+    """Mahalle bazlı talep tahmini (Mock data - gelecekte AI entegrasyonu)"""
     
-    try:
-        tahminler = talep_tahmin_tum_mahalleler()
-    except:
-        # Örnek veri
-        tahminler = [
-            {'mahalle': 'Balat', 'tahmin': 28.83, 'konteyner': 9900},
-            {'mahalle': 'Fethiye', 'tahmin': 28.54, 'konteyner': 9800},
-            {'mahalle': 'Ataevler', 'tahmin': 26.68, 'konteyner': 9160},
-            {'mahalle': 'Görükle', 'tahmin': 24.49, 'konteyner': 8410},
-            {'mahalle': 'Kültür', 'tahmin': 25.10, 'konteyner': 8620},
-        ]
+    # Mock veri - Gelecekte ai.güncel_v6_fullvehicle ile entegre edilecek
+    tahminler = [
+        {'mahalle': 'Balat', 'tahmin': 28.83, 'konteyner': 9900},
+        {'mahalle': 'Fethiye', 'tahmin': 28.54, 'konteyner': 9800},
+        {'mahalle': 'Ataevler', 'tahmin': 26.68, 'konteyner': 9160},
+        {'mahalle': 'Görükle', 'tahmin': 24.49, 'konteyner': 8410},
+        {'mahalle': 'Kültür', 'tahmin': 25.10, 'konteyner': 8620},
+    ]
     
     return jsonify(tahminler)
 
 @app.route('/api/optimize', methods=['POST'])
 def api_optimize():
-    """Yeni rota hesaplama"""
+    """Yeni rota hesaplama (Mock data - gelecekte AI entegrasyonu)"""
     
     data = request.json or {}
     tarih = data.get('tarih', datetime.now().strftime('%Y-%m-%d'))
     
-    try:
-        sonuc = optimize_rotalar(tarih)
-    except:
-        sonuc = {
-            'basarili': True,
-            'mesaj': 'Rotalar optimize edildi',
-            'toplam_mesafe': 1620,
-            'tasarruf_km': 540,
-            'tasarruf_yuzde': 25
-        }
+    # Mock veri - Gelecekte ai.güncel_v6_fullvehicle ile entegre edilecek
+    sonuc = {
+        'basarili': True,
+        'mesaj': 'Rotalar optimize edildi',
+        'toplam_mesafe': 1620,
+        'tasarruf_km': 540,
+        'tasarruf_yuzde': 25
+    }
     
     return jsonify(sonuc)
 

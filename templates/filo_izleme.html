@@ -262,7 +262,7 @@
         <div class="card border-success">
             <div class="card-header bg-success bg-opacity-25 d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-robot me-2"></i>AI Optimizasyon Sonuçları</span>
-                <span class="badge bg-success fs-6">%20 Tasarruf</span>
+                <span class="badge bg-success fs-6" id="cmp-tasarruf-yuzde">%20 Tasarruf</span>
             </div>
             <div class="card-body">
                 <div class="row text-center">
@@ -281,7 +281,7 @@
                                     <small class="text-muted">AI</small>
                                 </div>
                             </div>
-                            <div class="text-success mt-2 fw-bold">
+                            <div class="text-success mt-2 fw-bold" id="cmp-mesafe-fark">
                                 <i class="bi bi-graph-down-arrow"></i> -37 km
                             </div>
                         </div>
@@ -302,7 +302,7 @@
                                     <small class="text-muted">AI</small>
                                 </div>
                             </div>
-                            <div class="text-success mt-2 fw-bold">
+                            <div class="text-success mt-2 fw-bold" id="cmp-yakit-fark">
                                 <i class="bi bi-fuel-pump"></i> -11 L
                             </div>
                         </div>
@@ -323,7 +323,7 @@
                                     <small class="text-muted">AI</small>
                                 </div>
                             </div>
-                            <div class="text-success mt-2 fw-bold">
+                            <div class="text-success mt-2 fw-bold" id="cmp-co2-fark">
                                 <i class="bi bi-tree"></i> -29 kg
                             </div>
                         </div>
@@ -344,7 +344,7 @@
                                     <small class="text-muted">AI</small>
                                 </div>
                             </div>
-                            <div class="text-success mt-2 fw-bold">
+                            <div class="text-success mt-2 fw-bold" id="cmp-maliyet-fark">
                                 <i class="bi bi-cash-stack"></i> -₺286
                             </div>
                         </div>
@@ -409,11 +409,16 @@
 
 {% block extra_js %}
 <script>
-    // Harita başlat
-    const map = L.map('map').setView([40.22, 28.94], 12);
+    // Harita başlat (Canvas renderer ile performans artışı)
+    const map = L.map('map', {
+        preferCanvas: true,
+        renderer: L.canvas({ tolerance: 5 })
+    }).setView([40.22, 28.94], 12);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
+        attribution: '© OpenStreetMap',
+        updateWhenIdle: true,
+        updateWhenZooming: false
     }).addTo(map);
     
     // Araç renkleri
@@ -458,8 +463,14 @@
     }
     
     // Araç verilerini yükle
+    // Demo araçları (filo izlemede gösterilen araçlar)
+    const demoAraclar = [2824, 1520, 3615, 4527, 6574];
+    
+    // Tam veri (filtresiz - karşılaştırma için)
+    const aracTamVerileri = {};
+    
     async function loadAracVerileri(tarih) {
-        const araclar = [2824, 1520, 3615, 4527, 6574];
+        const araclar = demoAraclar;
         
         for (const aracId of araclar) {
             try {
@@ -467,11 +478,16 @@
                 const data = await response.json();
                 
                 if (!data.hata) {
-                    // Saate göre sırala ve zaman bilgisi ekle
-                    aracVerileri[aracId] = data.duraklar.map(d => ({
+                    // Tam veriyi sakla (karşılaştırma için)
+                    aracTamVerileri[aracId] = data.duraklar.map(d => ({
                         ...d,
                         time: parseTime(d.saat)
-                    })).filter(d => d.time >= startTime && d.time <= endTime);
+                    }));
+                    
+                    // Animasyon için sadece çalışma saatlerini filtrele
+                    aracVerileri[aracId] = aracTamVerileri[aracId].filter(
+                        d => d.time >= startTime && d.time <= endTime
+                    );
                     
                     // Toplam durak güncelle
                     document.getElementById(`durak-${aracId}`).textContent = 
@@ -732,77 +748,134 @@
         
         const btn = this;
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Hesaplanıyor...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Yükleniyor...';
         
-        // Simüle edilmiş gecikme (ML modeli çalışıyormuş gibi)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Mock AI rotaları oluştur (gerçek rotaların optimize edilmiş versiyonu)
-        generateMockAIRoutes();
-        
-        // Karşılaştırma değerlerini hesapla
-        calculateComparison();
-        
-        // Paneli göster
-        showAIResults();
-        
-        // Radio butonları aktifleştir
-        document.getElementById('view-ai').disabled = false;
-        document.getElementById('view-karsilastir').disabled = false;
-        
-        btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Optimize Edildi';
-        btn.classList.remove('btn-primary');
-        btn.classList.add('btn-success');
-        
-        aiOptimized = true;
+        try {
+            // Gerçek AI optimize edilmiş rotaları API'den çek
+            const response = await fetch('/api/ai-optimized-routes');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Rotalar yüklenemedi');
+            }
+            
+            // AI rotalarını işle ve dönüştür
+            loadAIRoutesFromAPI(result.data);
+            
+            // Karşılaştırma değerlerini hesapla
+            calculateComparison();
+            
+            // Paneli göster
+            showAIResults();
+            
+            // Radio butonları aktifleştir
+            document.getElementById('view-ai').disabled = false;
+            document.getElementById('view-karsilastir').disabled = false;
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Optimize Edildi';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-success');
+            
+            aiOptimized = true;
+            
+        } catch (error) {
+            console.error('AI rotaları yüklenirken hata:', error);
+            alert('AI rotaları yüklenirken bir hata oluştu: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic me-1"></i>AI ile Optimize Et';
+        }
     });
     
-    // Mock AI rotaları oluştur
-    function generateMockAIRoutes() {
-        // AI rotaları = Mevcut rotaların optimize edilmiş hali
-        // Gerçekte ML modeli burada çalışacak
-        Object.keys(aracVerileri).forEach(aracId => {
-            const mevcutDuraklar = aracVerileri[aracId] || [];
+    // API'den gelen AI rotalarını yükle
+    function loadAIRoutesFromAPI(apiData) {
+        // routes_api.json formatındaki veriyi işle
+        if (!apiData || !apiData.vehicles) {
+            console.error('Geçersiz API verisi:', apiData);
+            return;
+        }
+        
+        // Sadece demo araçlarının rotalarını yükle
+        apiData.vehicles.forEach(vehicle => {
+            const vehicleId = vehicle.vehicle_id.toString();
             
-            // Mock: Bazı gereksiz durakları çıkar, rotayı kısalt
-            // Gerçek optimizasyonda TSP/VRP algoritması kullanılacak
-            const optimizeDuraklar = mevcutDuraklar.filter((d, i) => {
-                // Her 5. duraktan 1'ini atla (simüle optimizasyon)
-                return i % 5 !== 0 || i === 0;
-            });
+            // Sadece demo araçlarını işle
+            if (!demoAraclar.includes(parseInt(vehicleId))) {
+                return;
+            }
             
-            aiRotaVerileri[aracId] = optimizeDuraklar;
+            const route = vehicle.route || [];
+            
+            // Performans için: Her 3. noktayı al (yine de tüm rotayı gösterir)
+            const simplifiedRoute = route.length > 100 
+                ? route.filter((point, idx) => idx % 3 === 0 || idx === route.length - 1)
+                : route;
+            
+            // API formatını Leaflet formatına çevir
+            const duraklar = simplifiedRoute.map(point => ({
+                lat: point.lat,
+                lon: point.lon,
+                mahalle: point.mahalle,
+                saat: point.arrival_time ? point.arrival_time.split('T')[1].substring(0, 5) : null,
+                demand_ton: point.demand_ton,
+                current_load_ton: point.current_load_ton,
+                step: point.step
+            }));
+            
+            aiRotaVerileri[vehicleId] = duraklar;
         });
+        
+        console.log(`${Object.keys(aiRotaVerileri).length} demo araç rotası yüklendi (${demoAraclar.join(', ')})`);
     }
     
     // Karşılaştırma değerlerini hesapla
     function calculateComparison() {
         let toplamMevcutMesafe = 0;
         let toplamAIMesafe = 0;
+        let mevcutDurakSayisi = 0;
+        let aiDurakSayisi = 0;
         
-        Object.keys(aracVerileri).forEach(aracId => {
-            const mevcutDuraklar = aracVerileri[aracId] || [];
-            const aiDuraklar = aiRotaVerileri[aracId] || [];
+        console.log('=== KARŞILAŞTIRMA HESAPLANIYOR ===');
+        console.log('Mevcut araçlar:', Object.keys(aracTamVerileri));
+        console.log('AI araçlar:', Object.keys(aiRotaVerileri));
+        
+        // Karşılaştırma için TAM VERİYİ kullan (filtresiz)
+        Object.keys(aracTamVerileri).forEach(aracId => {
+            const mevcutDuraklar = aracTamVerileri[aracId] || [];
+            mevcutDurakSayisi += mevcutDuraklar.length;
             
             // Mevcut mesafe
+            let aracMesafe = 0;
             for (let i = 1; i < mevcutDuraklar.length; i++) {
-                toplamMevcutMesafe += haversine(
+                aracMesafe += haversine(
                     mevcutDuraklar[i-1].lat, mevcutDuraklar[i-1].lon,
                     mevcutDuraklar[i].lat, mevcutDuraklar[i].lon
                 );
             }
+            toplamMevcutMesafe += aracMesafe;
+            console.log(`Mevcut Araç ${aracId}: ${mevcutDuraklar.length} durak, ${aracMesafe.toFixed(1)} km`);
+        });
+        
+        Object.keys(aiRotaVerileri).forEach(aracId => {
+            const aiDuraklar = aiRotaVerileri[aracId] || [];
+            aiDurakSayisi += aiDuraklar.length;
             
             // AI mesafe
+            let aracMesafe = 0;
             for (let i = 1; i < aiDuraklar.length; i++) {
-                toplamAIMesafe += haversine(
+                aracMesafe += haversine(
                     aiDuraklar[i-1].lat, aiDuraklar[i-1].lon,
                     aiDuraklar[i].lat, aiDuraklar[i].lon
                 );
             }
+            toplamAIMesafe += aracMesafe;
+            console.log(`AI Araç ${aracId}: ${aiDuraklar.length} durak, ${aracMesafe.toFixed(1)} km`);
         });
         
         // Değerleri güncelle
+        console.log(`\nTOPLAM Mevcut: ${toplamMevcutMesafe.toFixed(1)} km`);
+        console.log(`TOPLAM AI: ${toplamAIMesafe.toFixed(1)} km`);
+        
         const mesafeFarki = toplamMevcutMesafe - toplamAIMesafe;
         const yakitMevcut = toplamMevcutMesafe * 0.3; // 0.3 L/km
         const yakitAI = toplamAIMesafe * 0.3;
@@ -810,6 +883,8 @@
         const co2AI = yakitAI * 2.65;
         const maliyetMevcut = yakitMevcut * 26; // ₺26/L
         const maliyetAI = yakitAI * 26;
+        
+        console.log(`Mesafe Farkı: ${mesafeFarki.toFixed(1)} km (${((mesafeFarki/toplamMevcutMesafe)*100).toFixed(1)}%)`);
         
         // UI güncelle
         document.getElementById('cmp-mesafe-mevcut').textContent = `${toplamMevcutMesafe.toFixed(0)} km`;
@@ -823,6 +898,26 @@
         
         document.getElementById('cmp-maliyet-mevcut').textContent = `₺${maliyetMevcut.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
         document.getElementById('cmp-maliyet-ai').textContent = `₺${maliyetAI.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+        
+        // Tasarruf yüzdelerini hesapla ve göster
+        const mesafeTasarruf = ((mesafeFarki / toplamMevcutMesafe) * 100).toFixed(1);
+        const yakitTasarruf = ((yakitMevcut - yakitAI) / yakitMevcut * 100).toFixed(1);
+        const co2Tasarruf = ((co2Mevcut - co2AI) / co2Mevcut * 100).toFixed(1);
+        const maliyetTasarruf = maliyetMevcut - maliyetAI;
+        
+        // Fark değerlerini güncelle
+        document.getElementById('cmp-tasarruf-yuzde').textContent = `%${mesafeTasarruf} Tasarruf`;
+        document.getElementById('cmp-mesafe-fark').innerHTML = `<i class="bi bi-graph-down-arrow"></i> ${mesafeFarki.toFixed(0)} km`;
+        document.getElementById('cmp-yakit-fark').innerHTML = `<i class="bi bi-fuel-pump"></i> ${(yakitMevcut - yakitAI).toFixed(0)} L`;
+        document.getElementById('cmp-co2-fark').innerHTML = `<i class="bi bi-tree"></i> ${(co2Mevcut - co2AI).toFixed(0)} kg`;
+        document.getElementById('cmp-maliyet-fark').innerHTML = `<i class="bi bi-cash-stack"></i> ₺${maliyetTasarruf.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+        
+        console.log(`AI Optimizasyon Sonuçları:
+            Mesafe Tasarrufu: ${mesafeFarki.toFixed(1)} km (${mesafeTasarruf}%)
+            Yakıt Tasarrufu: ${(yakitMevcut - yakitAI).toFixed(1)} L (${yakitTasarruf}%)
+            CO2 Azalması: ${(co2Mevcut - co2AI).toFixed(1)} kg (${co2Tasarruf}%)
+            Maliyet Tasarrufu: ₺${maliyetTasarruf.toFixed(0)}
+            Mevcut Durak: ${mevcutDurakSayisi}, AI Durak: ${aiDurakSayisi}`);
     }
     
     // AI sonuçlarını göster
@@ -892,30 +987,58 @@
     
     // AI rotalarını çiz
     function drawAIRoutes() {
-        // AI renkleri (yeşil tonları)
+        // AI renkleri - Sadece demo araçlar için net ve belirgin renkler
+        // Mevcut rota renklerine göre daha parlak yeşil tonları (optimize edilmiş = yeşil)
         const aiRenkleri = {
-            2824: '#20c997',
-            1520: '#198754',
-            3615: '#0d6efd',
-            4527: '#0dcaf0',
-            6574: '#6610f2'
+            2824: '#00e676',  // Parlak yeşil (mevcut: kırmızı)
+            1520: '#1de9b6',  // Teal yeşil (mevcut: mavi)
+            3615: '#76ff03',  // Lime yeşil (mevcut: yeşil)
+            4527: '#ffeb3b',  // Parlak sarı (mevcut: turuncu)
+            6574: '#9c27b0'   // Mor (mevcut: mor - benzer ton)
         };
+        
+        // Performans: Tüm polyline'ları topla ve batch olarak ekle
+        const polylinesToAdd = [];
         
         Object.keys(aiRotaVerileri).forEach(aracId => {
             const duraklar = aiRotaVerileri[aracId] || [];
             
-            if (duraklar.length > 0 && !aiPolylines[aracId]) {
-                const coords = duraklar.map(d => [d.lat, d.lon]);
+            if (duraklar.length > 0) {
+                // Eski polyline'ı temizle
+                if (aiPolylines[aracId]) {
+                    aiPolylines[aracId].remove();
+                }
                 
-                aiPolylines[aracId] = L.polyline(coords, {
-                    color: aiRenkleri[aracId],
-                    weight: 4,
-                    opacity: 0.9,
+                const coords = duraklar.map(d => [d.lat, d.lon]);
+                const renk = aiRenkleri[aracId] || '#00ff88';
+                
+                const polyline = L.polyline(coords, {
+                    color: renk,
+                    weight: 5,
+                    opacity: 0.85,
                     dashArray: '10, 5',
+                    smoothFactor: 1.5,  // Performans için
                     className: 'ai-route'
-                }).addTo(map);
+                });
+                
+                // Tooltip ekle
+                polyline.bindTooltip(`AI Optimize Araç ${aracId}<br>${duraklar.length} durak`, {
+                    permanent: false,
+                    direction: 'top'
+                });
+                
+                aiPolylines[aracId] = polyline;
+                polylinesToAdd.push(polyline);
             }
         });
+        
+        // Tüm polyline'ları bir anda ekle (performans için)
+        if (polylinesToAdd.length > 0) {
+            const group = L.layerGroup(polylinesToAdd);
+            group.addTo(map);
+        }
+        
+        console.log(`${Object.keys(aiPolylines).length} AI rotası çizildi`);
     }
     
     // Sayfa yüklendiğinde

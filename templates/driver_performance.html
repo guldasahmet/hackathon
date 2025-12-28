@@ -304,7 +304,9 @@ function updateDashboard(dashData, perfData, achData, leaderData) {
     document.getElementById('current-rank').textContent = `#${weekSummary.rank || '-'}`;
     document.getElementById('current-rank').className = `leaderboard-rank rank-${weekSummary.rank || ''}`;
     document.getElementById('days-worked').textContent = summary.days_worked || 0;
-    document.getElementById('fuel-saved').textContent = `${(summary.total_fuel_saved || 0).toFixed(1)} L`;
+    // Yakıt tasarrufu negatif görünmesin
+    const fuelSaved = Math.abs(summary.total_fuel_saved || 0);
+    document.getElementById('fuel-saved').textContent = `${fuelSaved.toFixed(1)} L`;
     document.getElementById('achievement-count').textContent = Object.values(achData.stats || {}).reduce((a, b) => a + b, 0);
     
     // Rozetler

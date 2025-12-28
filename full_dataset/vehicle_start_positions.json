@@ -1,0 +1,595 @@
+{
+  "reference_date": "2025-12-19",
+  "reference_time": "07:00:00",
+  "total_vehicles": 42,
+  "vehicles": [
+    {
+      "vehicle_id": 1106,
+      "vehicle_name": "Vehicle 24",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.8,
+      "start_position": {
+        "lat": 40.189705,
+        "lon": 28.931206,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:01",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 1409,
+      "vehicle_name": "Vehicle 2",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.4,
+      "start_position": {
+        "lat": 40.190327,
+        "lon": 28.930677,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:58:21",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 1434,
+      "vehicle_name": "Vehicle 17",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.6,
+      "start_position": {
+        "lat": 40.190144,
+        "lon": 28.930801,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:02:15",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 1488,
+      "vehicle_name": "Vehicle 12",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.0,
+      "start_position": {
+        "lat": 40.201008,
+        "lon": 28.992893,
+        "mahalle": "Odunluk Mh.",
+        "timestamp": "2025-12-19T07:00:29",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 1520,
+      "vehicle_name": "Vehicle 11",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.4,
+      "start_position": {
+        "lat": 40.161545,
+        "lon": 28.817295,
+        "mahalle": "Kayapa Mh.",
+        "timestamp": "2025-12-19T06:57:07",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 1711,
+      "vehicle_name": "Vehicle 39",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.8,
+      "start_position": {
+        "lat": 40.207005,
+        "lon": 28.940918,
+        "mahalle": "Üçevler Mh.",
+        "timestamp": "2025-12-19T07:00:59",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 2291,
+      "vehicle_name": "Vehicle 44",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.6,
+      "start_position": {
+        "lat": 40.190372,
+        "lon": 28.930595,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:49",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 2424,
+      "vehicle_name": "Vehicle 9",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.6,
+      "start_position": {
+        "lat": 40.216515,
+        "lon": 28.993294,
+        "mahalle": "Karaman Mh.",
+        "timestamp": "2025-12-19T06:59:21",
+        "status": "Rölanti Alarmı"
+      }
+    },
+    {
+      "vehicle_id": 2519,
+      "vehicle_name": "Vehicle 33",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.2,
+      "start_position": {
+        "lat": 40.190327,
+        "lon": 28.930799,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:01:12",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 2535,
+      "vehicle_name": "Vehicle 13",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 12.2,
+      "start_position": {
+        "lat": 40.190258,
+        "lon": 28.930935,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:34",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 2584,
+      "vehicle_name": "Vehicle 35",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.4,
+      "start_position": {
+        "lat": 40.190353,
+        "lon": 28.930973,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:02:56",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 2674,
+      "vehicle_name": "Vehicle 32",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.4,
+      "start_position": {
+        "lat": 40.190132,
+        "lon": 28.930782,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:59:27",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 2679,
+      "vehicle_name": "Vehicle 7",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.4,
+      "start_position": {
+        "lat": 40.190117,
+        "lon": 28.930847,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:57:11",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 2824,
+      "vehicle_name": "Vehicle 1",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.8,
+      "start_position": {
+        "lat": 40.190517,
+        "lon": 28.930618,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:07",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 3045,
+      "vehicle_name": "Vehicle 42",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.0,
+      "start_position": {
+        "lat": 40.190334,
+        "lon": 28.930996,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:03:53",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 3286,
+      "vehicle_name": "Vehicle 6",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.0,
+      "start_position": {
+        "lat": 40.187885,
+        "lon": 28.929371,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:08",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 3547,
+      "vehicle_name": "Vehicle 29",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.6,
+      "start_position": {
+        "lat": 40.190182,
+        "lon": 28.93084,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:57:20",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 3615,
+      "vehicle_name": "Vehicle 25",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 12.4,
+      "start_position": {
+        "lat": 40.208473,
+        "lon": 28.952965,
+        "mahalle": "Beşevler Mh.",
+        "timestamp": "2025-12-19T07:00:00",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 4257,
+      "vehicle_name": "Vehicle 18",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.2,
+      "start_position": {
+        "lat": 40.190151,
+        "lon": 28.930914,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:03:20",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 4527,
+      "vehicle_name": "Vehicle 30",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.8,
+      "start_position": {
+        "lat": 40.187962,
+        "lon": 28.92926,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:02",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 4582,
+      "vehicle_name": "Vehicle 14",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.0,
+      "start_position": {
+        "lat": 40.190022,
+        "lon": 28.930954,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:02:38",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 4657,
+      "vehicle_name": "Vehicle 5",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.8,
+      "start_position": {
+        "lat": 40.190315,
+        "lon": 28.930691,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:59:57",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 4811,
+      "vehicle_name": "Vehicle 15",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.8,
+      "start_position": {
+        "lat": 40.190041,
+        "lon": 28.931505,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:08",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 5012,
+      "vehicle_name": "Vehicle 4",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.2,
+      "start_position": {
+        "lat": 40.190308,
+        "lon": 28.930906,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:59:38",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 5333,
+      "vehicle_name": "Vehicle 38",
+      "vehicle_type": "Small Garbage Truck",
+      "capacity_m3": 9.0,
+      "capacity_ton": 4.4,
+      "start_position": {
+        "lat": 40.190208,
+        "lon": 28.930614,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:47",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 5506,
+      "vehicle_name": "Vehicle 3",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.4,
+      "start_position": {
+        "lat": 40.190498,
+        "lon": 28.930904,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:02:16",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 5552,
+      "vehicle_name": "Vehicle 28",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.0,
+      "start_position": {
+        "lat": 40.21508,
+        "lon": 28.973696,
+        "mahalle": "Barış Mh.",
+        "timestamp": "2025-12-19T06:59:01",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 5803,
+      "vehicle_name": "Vehicle 45",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.8,
+      "start_position": {
+        "lat": 40.189926,
+        "lon": 28.930801,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:57:01",
+        "status": "Rölanti Alarmı"
+      }
+    },
+    {
+      "vehicle_id": 6514,
+      "vehicle_name": "Vehicle 31",
+      "vehicle_type": "Small Garbage Truck",
+      "capacity_m3": 9.0,
+      "capacity_ton": 4.6,
+      "start_position": {
+        "lat": 40.190086,
+        "lon": 28.930481,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:09",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 6574,
+      "vehicle_name": "Vehicle 27",
+      "vehicle_type": "Small Garbage Truck",
+      "capacity_m3": 9.0,
+      "capacity_ton": 4.4,
+      "start_position": {
+        "lat": 40.190041,
+        "lon": 28.930637,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:58:35",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 6635,
+      "vehicle_name": "Vehicle 37",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.6,
+      "start_position": {
+        "lat": 40.190228,
+        "lon": 28.931269,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:00",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 6881,
+      "vehicle_name": "Vehicle 36",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.6,
+      "start_position": {
+        "lat": 40.190079,
+        "lon": 28.930758,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:56:26",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 7201,
+      "vehicle_name": "Vehicle 43",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.6,
+      "start_position": {
+        "lat": 40.190411,
+        "lon": 28.930599,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:56:33",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 7224,
+      "vehicle_name": "Vehicle 34",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 11.6,
+      "start_position": {
+        "lat": 40.202579,
+        "lon": 28.950399,
+        "mahalle": "Üçevler Mh.",
+        "timestamp": "2025-12-19T06:58:58",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 7873,
+      "vehicle_name": "Vehicle 20",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.4,
+      "start_position": {
+        "lat": 40.190277,
+        "lon": 28.931267,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:04:08",
+        "status": "Kontak Açıldı"
+      }
+    },
+    {
+      "vehicle_id": 7912,
+      "vehicle_name": "Vehicle 10",
+      "vehicle_type": "Small Garbage Truck",
+      "capacity_m3": 9.0,
+      "capacity_ton": 4.8,
+      "start_position": {
+        "lat": 40.189915,
+        "lon": 28.930286,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:29",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    },
+    {
+      "vehicle_id": 7924,
+      "vehicle_name": "Vehicle 26",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 12.2,
+      "start_position": {
+        "lat": 40.190067,
+        "lon": 28.930628,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:40",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 8359,
+      "vehicle_name": "Vehicle 22",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 8.0,
+      "start_position": {
+        "lat": 40.190304,
+        "lon": 28.930977,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:57:25",
+        "status": "Duran"
+      }
+    },
+    {
+      "vehicle_id": 8527,
+      "vehicle_name": "Vehicle 40",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 10.8,
+      "start_position": {
+        "lat": 40.190132,
+        "lon": 28.930801,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T06:59:55",
+        "status": "Duraklama Alarmı"
+      }
+    },
+    {
+      "vehicle_id": 9279,
+      "vehicle_name": "Vehicle 16",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 10.8,
+      "start_position": {
+        "lat": 40.190247,
+        "lon": 28.931149,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:03",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 9785,
+      "vehicle_name": "Vehicle 41",
+      "vehicle_type": "Large Garbage Truck",
+      "capacity_m3": 16.5,
+      "capacity_ton": 7.2,
+      "start_position": {
+        "lat": 40.190304,
+        "lon": 28.931019,
+        "mahalle": "Alaaddinbey Mh.",
+        "timestamp": "2025-12-19T07:00:18",
+        "status": "Hareketli"
+      }
+    },
+    {
+      "vehicle_id": 9928,
+      "vehicle_name": "Vehicle 19",
+      "vehicle_type": "Crane Vehicle",
+      "capacity_m3": 23.0,
+      "capacity_ton": 12.4,
+      "start_position": {
+        "lat": 40.199642,
+        "lon": 28.839983,
+        "mahalle": "30 Ağustos Zafer Mh.",
+        "timestamp": "2025-12-19T07:00:29",
+        "status": "Cihaz Besleme Gerilimi"
+      }
+    }
+  ]
+}

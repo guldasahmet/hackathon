@@ -226,3 +226,103 @@ def api_vehicle_route(vehicle_id):
     }
     
     return jsonify(rota)
+
+
+@routes_bp.route('/ai-optimized-routes')
+def get_ai_optimized_routes():
+    """
+    AI optimize edilmiş rotaları döndür
+    routes_api.json dosyasındaki VRP çözümünü sunar
+    """
+    try:
+        # routes_api.json dosyasını oku
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        routes_file = os.path.join(project_root, 'full_dataset', 'routes_api.json')
+        
+        if not os.path.exists(routes_file):
+            return jsonify({
+                'success': False,
+                'error': 'routes_api.json dosyası bulunamadı'
+            }), 404
+        
+        import json
+        with open(routes_file, 'r', encoding='utf-8-sig') as f:
+            routes_data = json.load(f)
+        
+        return jsonify({
+            'success': True,
+            'data': routes_data
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@routes_bp.route('/ai-optimized-routes/stats')
+def get_ai_routes_stats():
+    """AI rotaları istatistiklerini döndür"""
+    try:
+        # routes_api.json dosyasını oku
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        routes_file = os.path.join(project_root, 'full_dataset', 'routes_api.json')
+        
+        if not os.path.exists(routes_file):
+            return jsonify({
+                'success': False,
+                'error': 'routes_api.json dosyası bulunamadı'
+            }), 404
+        
+        import json
+        with open(routes_file, 'r', encoding='utf-8-sig') as f:
+            routes_data = json.load(f)
+        
+        # İstatistikleri hesapla
+        total_vehicles = routes_data.get('total_vehicles', 0)
+        total_stops = routes_data.get('total_stops', 0)
+        vehicles = routes_data.get('vehicles', [])
+        
+        # Araç başına ortalama durak
+        avg_stops = total_stops // total_vehicles if total_vehicles > 0 else 0
+        
+        # Toplam tonaj hesapla
+        total_tonnage = 0
+        vehicles_with_routes = 0
+        for vehicle in vehicles:
+            route = vehicle.get('route', [])
+            if route:
+                vehicles_with_routes += 1
+                # Son noktadaki yük = toplam toplanan atık
+                last_point = route[-1]
+                total_tonnage += last_point.get('current_load_ton', 0)
+        
+        # Mahalle sayısını hesapla
+        all_neighborhoods = set()
+        for vehicle in vehicles:
+            route = vehicle.get('route', [])
+            for point in route:
+                mahalle = point.get('mahalle')
+                if mahalle:
+                    all_neighborhoods.add(mahalle)
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_vehicles': total_vehicles,
+                'total_stops': total_stops,
+                'avg_stops_per_vehicle': avg_stops,
+                'total_tonnage': round(total_tonnage, 2),
+                'neighborhoods_covered': len(all_neighborhoods),
+                'vehicles_with_routes': vehicles_with_routes,
+                'date': routes_data.get('date'),
+                'day': routes_data.get('day')
+            }
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

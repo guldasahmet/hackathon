@@ -388,6 +388,216 @@
         }
     }
     
+    // Araç marker'ları ve veri
+    const aracMarkers = {};
+    const aracVerileri = {};
+    const aracPolylines = {};
+    const aracRenkleri = {
+        2824: '#dc3545',
+        1520: '#007bff', 
+        3615: '#28a745',
+        4527: '#fd7e14',
+        6574: '#6f42c1'
+    };
+    
+    // Sonuç sayaçları
+    let yuklenmeBasarili = 0;
+    let yuklenmeBasarisiz = 0;
+    
+    // Gerçek araç konumlarını yükle - CANLI SİMÜLASYON
+    async function loadAracKonumlari() {
+        const demoAraclar = [2824, 1520, 3615, 4527, 6574];
+        const tarih = '19.12.2025';
+        
+        console.log('Araç konumları yüklenmeye başlanıyor...');
+        
+        for (const aracId of demoAraclar) {
+            try {
+                const response = await fetch(`/api/arac/${aracId}/rota?tarih=${tarih}`);
+                const data = await response.json();
+                
+                if (data.hata) {
+                    console.error(`Araç ${aracId} hata:`, data.hata);
+                    yuklenmeBasarisiz++;
+                    continue;
+                }
+                
+                if (!data.duraklar || data.duraklar.length === 0) {
+                    console.warn(`Araç ${aracId} - durak verisi yok`);
+                    yuklenmeBasarisiz++;
+                    continue;
+                }
+                
+                // Araç verilerini sakla
+                aracVerileri[aracId] = data.duraklar;
+                
+                // İlk konumdan başla
+                const ilkKonum = data.duraklar[0];
+                const renk = aracRenkleri[aracId];
+                
+                // ARAÇ SİMGESİ - Kamyon ikonu (filo izleme gibi)
+                const truckIcon = L.divIcon({
+                    html: `
+                        <div style="position:relative;">
+                            <div style="
+                                background: ${renk};
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 6px;
+                                border: 3px solid white;
+                                box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 18px;
+                                transform: rotate(0deg);
+                            ">🚚</div>
+                            <div style="
+                                position: absolute;
+                                bottom: -18px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                background: rgba(0,0,0,0.8);
+                                color: white;
+                                padding: 2px 6px;
+                                border-radius: 10px;
+                                font-size: 10px;
+                                font-weight: bold;
+                                white-space: nowrap;
+                            ">${aracId}</div>
+                        </div>
+                    `,
+                    className: '',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+                
+                // Marker ekle
+                const marker = L.marker([ilkKonum.lat, ilkKonum.lon], {
+                    icon: truckIcon,
+                    zIndexOffset: 1000
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <div style="min-width:220px;">
+                        <h6 class="mb-2" style="color:${renk};"><i class="bi bi-truck"></i> Araç ${aracId}</h6>
+                        <hr class="my-1">
+                        <small>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><i class="bi bi-geo-alt"></i> Mahalle:</span>
+                                <strong>${ilkKonum.mahalle || 'Bilinmiyor'}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><i class="bi bi-clock"></i> Saat:</span>
+                                <strong>${ilkKonum.saat || '-'}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="bi bi-signpost"></i> Durak:</span>
+                                <strong>1 / ${data.duraklar.length}</strong>
+                            </div>
+                        </small>
+                    </div>
+                `);
+                
+                aracMarkers[aracId] = marker;
+                
+                // Rota çizgisi (ince, şeffaf)
+                const coords = data.duraklar.map(d => [d.lat, d.lon]);
+                const polyline = L.polyline([], {
+                    color: renk,
+                    weight: 3,
+                    opacity: 0.4,
+                    dashArray: '5, 5'
+                }).addTo(map);
+                
+                aracPolylines[aracId] = polyline;
+                
+                yuklenmeBasarili++;
+                console.log(`✅ Araç ${aracId} yüklendi - ${data.duraklar.length} durak`);
+                
+            } catch (error) {
+                console.error(`❌ Araç ${aracId} yüklenemedi:`, error);
+                yuklenmeBasarisiz++;
+            }
+        }
+        
+        console.log(`Sonuç: ${yuklenmeBasarili} başarılı, ${yuklenmeBasarisiz} başarısız`);
+        
+        // Haritayı araçlara zoom yap
+        if (yuklenmeBasarili > 0) {
+            const bounds = L.latLngBounds(
+                Object.values(aracVerileri).flat().map(d => [d.lat, d.lon])
+            );
+            map.fitBounds(bounds, { padding: [50, 50] });
+            
+            // Animasyonu başlat
+            setTimeout(startLiveAnimation, 1000);
+        }
+    }
+    
+    // CANLI ANİMASYON - Araçlar rotalarında hareket eder
+    let animationIndex = {};
+    let animationInterval = null;
+    
+    function startLiveAnimation() {
+        // Her araç için başlangıç indexi
+        Object.keys(aracVerileri).forEach(aracId => {
+            animationIndex[aracId] = 0;
+        });
+        
+        // Her 2 saniyede bir güncelle
+        animationInterval = setInterval(() => {
+            Object.keys(aracVerileri).forEach(aracId => {
+                const duraklar = aracVerileri[aracId];
+                const currentIndex = animationIndex[aracId];
+                
+                if (currentIndex < duraklar.length) {
+                    const konum = duraklar[currentIndex];
+                    const marker = aracMarkers[aracId];
+                    const polyline = aracPolylines[aracId];
+                    
+                    // Marker'i taşı
+                    marker.setLatLng([konum.lat, konum.lon]);
+                    
+                    // Rota çizgisini güncelle
+                    const gecmisDuraklar = duraklar.slice(0, currentIndex + 1).map(d => [d.lat, d.lon]);
+                    polyline.setLatLngs(gecmisDuraklar);
+                    
+                    // Popup'i güncelle
+                    const renk = aracRenkleri[aracId];
+                    marker.setPopupContent(`
+                        <div style="min-width:220px;">
+                            <h6 class="mb-2" style="color:${renk};"><i class="bi bi-truck"></i> Araç ${aracId}</h6>
+                            <hr class="my-1">
+                            <small>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span><i class="bi bi-geo-alt"></i> Mahalle:</span>
+                                    <strong>${konum.mahalle || 'Bilinmiyor'}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span><i class="bi bi-clock"></i> Saat:</span>
+                                    <strong>${konum.saat || '-'}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="bi bi-signpost"></i> İlerleme:</span>
+                                    <strong>${currentIndex + 1} / ${duraklar.length}</strong>
+                                </div>
+                            </small>
+                        </div>
+                    `);
+                    
+                    // İndex'i ilerlet
+                    animationIndex[aracId]++;
+                    
+                    // Bitişte başa dön
+                    if (animationIndex[aracId] >= duraklar.length) {
+                        animationIndex[aracId] = 0;
+                    }
+                }
+            });
+        }, 2000); // 2 saniye aralık
+    }
+    
     // API'den verileri yükle
     async function loadTrackingData() {
         try {
@@ -430,15 +640,25 @@
     loadTrackingData();
     loadNiluferSinir();
     loadMahallelerDropdown();
+    loadAracKonumlari();
     
     // Desktop: Mahalle seçimi
+    let selectedMahalleMarker = null;
     const mahalleSelect = document.getElementById('mahalle-select');
     if (mahalleSelect) {
         mahalleSelect.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const mahalleAd = selectedOption.textContent;
+            const lat = parseFloat(selectedOption.dataset.lat);
+            const lon = parseFloat(selectedOption.dataset.lon);
             
-            if (this.value) {
+            if (this.value && lat && lon) {
+                // Haritayı seçilen mahalleye zoom yap
+                map.setView([lat, lon], 13, {
+                    animate: true,
+                    duration: 1
+                });
+                
                 document.getElementById('mahalle-durum').innerHTML = `
                     <div class="list-group list-group-flush">
                         <div class="list-group-item d-flex justify-content-between bg-transparent">
@@ -448,6 +668,9 @@
                     </div>
                 `;
             } else {
+                // Seçim temizle
+                map.setView([40.22, 28.94], 12);
+                
                 document.getElementById('mahalle-durum').innerHTML = `
                     <p class="text-muted small text-center">
                         <i class="bi bi-info-circle me-1"></i>Mahalle seçin

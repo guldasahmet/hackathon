@@ -17,10 +17,10 @@
     <div class="col-md-3">
         <div class="card kpi-card h-100">
             <div class="card-body text-center">
-                <div class="kpi-value" id="kpi-tasarruf">₺966K</div>
+                <div class="kpi-value" id="kpi-tasarruf">₺0</div>
                 <div class="kpi-label">Yıllık Tasarruf</div>
-                <small class="text-success">
-                    <i class="bi bi-arrow-up"></i> +%18
+                <small class="text-success" id="kpi-tasarruf-artis">
+                    <i class="bi bi-arrow-up"></i> +%0
                 </small>
             </div>
         </div>
@@ -380,8 +380,12 @@
             const response = await fetch('/api/dashboard');
             const data = await response.json();
             
-            // KPI'ları güncelle
-            document.getElementById('kpi-tasarruf').textContent = '₺' + (data.yillik_tasarruf / 1000).toFixed(0) + 'K';
+            // KPI'ları güncelle - GERÇEK VERİLER, BİNLİK AYRAÇLI
+            // Yıllık tasarruf: 19.300.000 formatı
+            const tasarrufFormatted = new Intl.NumberFormat('tr-TR').format(data.yillik_tasarruf);
+            document.getElementById('kpi-tasarruf').textContent = '₺' + tasarrufFormatted;
+            document.getElementById('kpi-tasarruf-artis').innerHTML = `<i class="bi bi-arrow-up"></i> +%${data.yillik_tasarruf_artis}`;
+            
             document.getElementById('kpi-co2').textContent = data.co2_azalma + ' ton';
             document.getElementById('kpi-mesafe').textContent = '%' + data.mesafe_azalma;
             document.getElementById('kpi-sure').textContent = data.gunluk_sure_tasarruf + ' saat';
@@ -396,9 +400,9 @@
             
             // İstatistikleri güncelle
             document.getElementById('stat-mahalle').textContent = data.toplam_mahalle;
-            document.getElementById('stat-konteyner').textContent = data.toplam_konteyner.toLocaleString('tr-TR');
-            document.getElementById('stat-gunluk-tonaj').textContent = data.gunluk_tonaj + ' ton';
-            document.getElementById('stat-toplanan').textContent = data.yillik_tonaj.toLocaleString('tr-TR');
+            document.getElementById('stat-konteyner').textContent = data.toplam_konteyner ? data.toplam_konteyner.toLocaleString('tr-TR') : '-';
+            document.getElementById('stat-gunluk-tonaj').textContent = data.gunluk_tonaj ? data.gunluk_tonaj + ' ton' : '-';
+            document.getElementById('stat-toplanan').textContent = data.yillik_tonaj ? data.yillik_tonaj.toLocaleString('tr-TR') : '-';
             
             // Mahalle bilgisi güncelle
             document.getElementById('mahalle-yogunluk').innerHTML = `

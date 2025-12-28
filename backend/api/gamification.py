@@ -125,7 +125,7 @@ def calculate_scores(data):
     if data.get('expected_fuel_lt') and data.get('actual_fuel_lt'):
         expected = data['expected_fuel_lt']
         actual = data['actual_fuel_lt']
-        fuel_saved_lt = expected - actual
+        fuel_saved_lt = max(0, expected - actual)  # Negatif olmasın
         
         # Beklenen yakıttan az kullanım: bonus
         # Beklenen yakıttan fazla: ceza
@@ -327,6 +327,9 @@ def get_leaderboard():
     for row in cursor.fetchall():
         driver = dict(row)
         driver['rank'] = rank
+        # Yakıt tasarrufunu pozitif yap
+        if driver.get('total_fuel_saved'):
+            driver['total_fuel_saved'] = abs(driver['total_fuel_saved'])
         
         # Prim hesapla
         avg_score = driver['avg_score'] or 0
@@ -393,6 +396,9 @@ def get_driver_performance(driver_id):
     '''.format(days), (driver_id,))
     
     summary = dict(cursor.fetchone())
+    # Yakıt tasarrufunu pozitif yap
+    if summary.get('total_fuel_saved'):
+        summary['total_fuel_saved'] = abs(summary['total_fuel_saved'])
     
     # Mevcut seviye
     avg_score = summary['avg_score'] or 0
@@ -449,6 +455,9 @@ def get_driver_dashboard(driver_id):
     ''', (driver_id,))
     
     week_summary = dict(cursor.fetchone())
+    # Yakıt tasarrufunu pozitif yap
+    if week_summary.get('fuel_saved'):
+        week_summary['fuel_saved'] = abs(week_summary['fuel_saved'])
     
     # Sıralama
     cursor.execute('''

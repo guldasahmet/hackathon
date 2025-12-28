@@ -71,15 +71,87 @@ def api_mahalleler():
 def api_mahalleler_liste():
     """Dropdown için mahalle listesi"""
     
+    # Mahalle koordinatları (CSV'deki tam isimlerle)
+    mahalle_koordinatlari = {
+        '100. YIL ': {'lat': 40.2234, 'lon': 28.8678},
+        '19 MAYIS': {'lat': 40.2156, 'lon': 28.8423},
+        '23 NİSAN': {'lat': 40.2189, 'lon': 28.8567},
+        '29 EKİM': {'lat': 40.2112, 'lon': 28.8789},
+        '30 AĞUSTOS ZAFER ': {'lat': 40.2043, 'lon': 28.8601},
+        'AHMET YESEVİ': {'lat': 40.2267, 'lon': 28.8512},
+        'AKÇALAR': {'lat': 40.1998, 'lon': 28.8842},
+        'ALAADDİNBEY': {'lat': 40.2189, 'lon': 28.8518},
+        'ALTINŞEHİR': {'lat': 40.1998, 'lon': 28.8842},
+        'ATAEVLER': {'lat': 40.2043, 'lon': 28.8601},
+        'ATLAS': {'lat': 40.2156, 'lon': 28.8950},
+        'AYVA': {'lat': 40.2089, 'lon': 28.8823},
+        'BADIRGA': {'lat': 40.2445, 'lon': 28.8934},
+        'BALAT': {'lat': 40.2609, 'lon': 28.9377},
+        'BALKAN': {'lat': 40.2398, 'lon': 28.8645},
+        'BARIŞ': {'lat': 40.1889, 'lon': 28.8567},
+        'BAŞKÖY': {'lat': 40.1767, 'lon': 28.8678},
+        'BEŞEVLER': {'lat': 40.2156, 'lon': 28.9156},
+        'BÜYÜKBALIKLI': {'lat': 40.2523, 'lon': 28.9234},
+        'CUMHURİYET': {'lat': 40.2234, 'lon': 28.9089},
+        'ÇALI': {'lat': 40.1834, 'lon': 28.8423},
+        'ÇAMLICA': {'lat': 40.2345, 'lon': 28.8456},
+        'ÇATALAĞIL': {'lat': 40.2378, 'lon': 28.8234},
+        'ÇAYLI': {'lat': 40.1723, 'lon': 28.9234},
+        'DAĞYENİCE': {'lat': 40.2089, 'lon': 28.8967},
+        'DEMİRCİ': {'lat': 40.1998, 'lon': 28.9156},
+        'DOĞANKÖY': {'lat': 40.2267, 'lon': 28.9377},
+        'DUMLUPINAR': {'lat': 40.2089, 'lon': 28.8967},
+        'ERTUĞRUL': {'lat': 40.2234, 'lon': 28.9089},
+        'ESENTEPE': {'lat': 40.2156, 'lon': 28.8789},
+        'FADILLI': {'lat': 40.1889, 'lon': 28.9234},
+        'FETHİYE': {'lat': 40.1889, 'lon': 28.8567},
+        'GELEMİT': {'lat': 40.2445, 'lon': 28.9567},
+        'GÖKÇE': {'lat': 40.2523, 'lon': 28.9089},
+        'GÖLYAZI': {'lat': 40.2609, 'lon': 28.8456},
+        'GÖRÜKLE': {'lat': 40.2267, 'lon': 28.8512},
+        'GÜMÜŞTEPE': {'lat': 40.2378, 'lon': 28.8823},
+        'GÜNGÖREN': {'lat': 40.2189, 'lon': 28.9234},
+        'HASANAĞA': {'lat': 40.2043, 'lon': 28.9377},
+        'IŞIKTEPE': {'lat': 40.2156, 'lon': 28.8601},
+        'İHSANİYE': {'lat': 40.2445, 'lon': 28.8934},
+        'İNEGAZİ': {'lat': 40.1998, 'lon': 28.8678},
+        'İRFANİYE': {'lat': 40.2089, 'lon': 28.8512},
+        'KADRİYE': {'lat': 40.2234, 'lon': 28.8456},
+        'KARACAOBA': {'lat': 40.1767, 'lon': 28.9089},
+        'KARAMAN': {'lat': 40.2398, 'lon': 28.9156},
+        'KAYAPA': {'lat': 40.1834, 'lon': 28.8423},
+        'KIZILCIKLI': {'lat': 40.2267, 'lon': 28.8645},
+        'KORUBAŞI': {'lat': 40.2156, 'lon': 28.8967},
+        'KONAK': {'lat': 40.2112, 'lon': 28.8789},
+        'KONAKLI': {'lat': 40.1889, 'lon': 28.9234},
+        'KURUÇEŞME': {'lat': 40.2345, 'lon': 28.9377},
+        'KURTULUŞ': {'lat': 40.2523, 'lon': 28.8789},
+        'KÜLTÜR': {'lat': 40.2234, 'lon': 28.8678},
+        'MAKSEMPINAR': {'lat': 40.2609, 'lon': 28.8823},
+        'MİNARELİÇAVUŞ': {'lat': 40.2378, 'lon': 28.9089},
+        'ODUNLUK': {'lat': 40.2345, 'lon': 28.8456},
+        'ÖZLÜCE': {'lat': 40.2523, 'lon': 28.8645},
+        'TAHTALI': {'lat': 40.2189, 'lon': 28.8967},
+        'UNÇUKURU': {'lat': 40.2043, 'lon': 28.9156},
+        'ÜÇEVLER': {'lat': 40.2267, 'lon': 28.8601},
+        'ÜÇPINAR': {'lat': 40.2156, 'lon': 28.8512},
+        'ÜRÜNLÜ': {'lat': 40.2398, 'lon': 28.8456},
+        'YAYLACIK': {'lat': 40.1889, 'lon': 28.8823},
+        'YOLÇATI': {'lat': 40.2112, 'lon': 28.9234}
+    }
+    
     try:
         df = pd.read_csv('full_dataset/container_counts.csv', sep=';', encoding='utf-8')
         
         mahalleler = []
         for _, row in df.iterrows():
             mahalle_ad = str(row['MAHALLE']).strip()
+            coords = mahalle_koordinatlari.get(mahalle_ad, {'lat': 40.22, 'lon': 28.94})
             mahalleler.append({
                 'id': mahalle_ad.lower().replace(' ', '_').replace('ı', 'i').replace('ö', 'o').replace('ü', 'u').replace('ş', 's').replace('ç', 'c').replace('ğ', 'g').replace('.', ''),
-                'ad': mahalle_ad
+                'ad': mahalle_ad,
+                'lat': coords['lat'],
+                'lon': coords['lon']
             })
         
         mahalleler.sort(key=lambda x: x['ad'])
